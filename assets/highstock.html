@@ -1,0 +1,1389 @@
+<html>
+<head>
+    <script src="https://code.highcharts.com/stock/highstock.js"> </script>
+    <script src="http://code.highcharts.com/modules/exporting.js"> </script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"> </script>
+</head>
+<body>
+    
+    <div id='chartcontainer' style="min-width: 100%; height: 100%; margin: 0 auto " ></div>
+   
+<!-- HIGHSTOCK-->    
+    <script type="text/javascript">
+    
+       
+    function callHighstock(input)
+        {   
+           
+            
+            
+            $(document).ready(function(){
+                
+                $.ajax({
+                    url: "http://nodejsashir.us-east-2.elasticbeanstalk.com/11?symbol=" + input ,
+                    type: 'GET',
+                    dataType: 'json',
+
+                    cache: false,
+
+                    error: function(xhr, status, error) {
+                        
+                        Android.ajaxHistoricalComplete();
+                        console.log(JSON.parse(xhr.responseText));
+                        
+                    },
+
+                    success: function (data) {
+                        
+                        console.log(data);
+                        Highstockgraph(data);
+
+                    },
+                
+                    
+                });
+            });
+    
+            function Highstockgraph(data) {
+                Android.ajaxHistoricalComplete();
+                
+                Highcharts.stockChart('chartcontainer',{
+
+                                    chart: {
+                                    zoomType: 'x',
+                       
+                                    },
+
+                                    rangeSelector: {
+                                        
+                                        buttons: [{
+                                            type: 'week',
+                                            count: 1,
+                                            text: '1w'
+                                        }, {
+                                            type: 'month',
+                                            count: 1,
+                                            text: '1m'
+                                        }, {
+                                            type: 'month',
+                                            count: 3,
+                                            text: '3m'
+                                        },
+                                            {
+                                                type: 'month',
+                                                count: 6,
+                                                text: '6m'
+                                            }
+
+                                            , {
+                                                type: 'YTD',
+                                                count: 1,
+                                                text: 'YTD'
+                                            },
+                                            {
+                                                type: 'year',
+                                                count: 1,
+                                                text: '1y'
+                                            }, {
+                                                type: 'all',
+                                                count: 1,
+                                                text: 'All'
+                                            }],
+                                        selected: 0,
+                                        inputEnabled: false
+                                    },
+
+                                    exporting: {enabled: false},
+
+                                    title: {
+                                        text: input + ' Stock Value'
+                                    },
+                                    subtitle: {
+                                        useHTML:true,
+                                        text: '<a href="https://www.alphavantage.co/" target="_blank" style="color: blue" >Source: Alpha Vantage </a>'
+
+                                        },
+                                    yAxis: [{
+                                        title: {
+                                            text: 'Stock Value'
+                                        },
+                                        min: 0,
+
+                                    }],
+
+                                    series: [{
+                                        type: 'area',
+                                        name: input,
+                                        data: data,
+                                        threshold: null,
+                                        tooltip: {
+                                            valueDecimals: 2,
+
+                                        },
+                                        fillColor: {
+                                            linearGradient: {
+                                                x1: 0,
+                                                y1: 0,
+                                                x2: 0,
+                                                y2: 1
+                                            },
+                                            stops: [
+                                                [0, Highcharts.getOptions().colors[0]],
+                                                [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
+                                            ]
+                                        },
+
+
+                                    }],
+
+
+                                });
+                    }
+
+
+            }
+
+
+
+</script>
+
+  
+<!-- Price CHART-->
+
+<script type="text/javascript">
+    
+    
+     function callPrice(input)
+        {
+            
+            //var input = $('#autoComplete').val();
+            //console.log("In: " + input);
+
+            
+
+            $(document).ready(function(){
+                //console.log("Document ready");
+                $.ajax({
+                    url: "http://nodejsashir.us-east-2.elasticbeanstalk.com/2?symbol="+input ,
+                    type: 'GET',
+                    dataType: 'json',
+
+
+                    cache: false,
+
+                    
+                    success: function (data) {
+                        //$('.chartContainer').html(data);
+                        console.log(data);
+                        PRICEgraph(data);
+
+                    },
+                    error: function(xhr, status, error) {
+                        
+                        console.log(JSON.parse(xhr.responseText));
+                        //alert("error");
+                    },
+
+                
+                    
+                });
+            });
+
+
+            function PRICEgraph(data){
+            Android.ajaxPriceComplete();
+                console.log("Inside PRICE");
+
+
+                var change=data["change"];
+
+                Highcharts.chart('chartcontainer', {
+                    chart: {
+                        zoomType: 'xy',
+        
+                    },
+                title: {
+                    text: input+' Stock Price and Volume'
+                        },
+                subtitle: {
+                    useHTML:true,
+                    text: '<a href="https://www.alphavantage.co/" target="_blank" style="color: blue" >Source: Alpha Vantage </a>'
+        
+                    },
+                    
+                    xAxis: [{
+                        categories: data["finaldate"],
+                    
+                           
+        
+                    labels: {
+                        rotation: -45
+                        },
+                    crosshair: true,
+                    tickInterval: 5
+                    }],
+                
+                    yAxis: [{
+                        
+                        title: {
+                        text: 'Stock Price',
+                            style: {
+                                color: Highcharts.getOptions().colors[1]
+                                }
+                        },
+             
+                        /*labels: {
+                            format: 'value',
+                            style: {
+                                color: Highcharts.getOptions().colors[1]
+                            }
+                            },*/
+                       /* plotOptions: {
+                            series: line
+                        },*/
+                        tickInterval: 5,
+                        tooltip: {
+                            shared: false,
+                            formatter: function()
+                            {
+                                var s ='<b>' +this.x+ '</b><b>'+ this.y+'</b>';
+                                return s;
+                            }
+                            },
+    
+        
+                            }, 
+
+                            { // Secondary yAxis
+                            //max: [<?php echo $maxvol*4; ?>],
+                            title: {
+                                text: 'Volume',
+                                formatter: function(){
+                                return this.value/1000000 +"M"
+                                },
+                            style: {
+                                color: Highcharts.getOptions().colors[1]
+                                }
+            
+                            },
+        
+                            labels: {
+                                formatter: function(){
+                                return this.value/1000000 +"M"
+                                },
+            
+                            style: {
+                                color: Highcharts.getOptions().colors[1]
+                                }
+                            },
+                            opposite: true
+                            }],
+                            
+                            tooltip: {
+                                shared: false,
+                                useHTML: true,
+        
+                            },
+   
+    
+                        series: [ 
+    
+                            {    
+        
+                            name: input,
+                            type: 'area',
+                            color: '#e6e6ff',
+                            //fillOpacity: 1,
+        
+                            data: data["finalval"],
+                            marker: {
+                                enabled: false
+                                },
+                            },
+    
+                        {
+                            name: 'Volume',
+                            color: '#FF0000',
+                            type: 'column',
+                            yAxis: 1,
+                            data: data["finalvol"],
+       
+                        },
+    
+    
+                        ]
+                    });
+
+            }
+        }
+
+                
+
+</script>
+
+
+
+
+
+ <!--SMA-->
+<script type="text/javascript">
+
+   
+     function callSMA(input)
+    {
+            
+            /*var input = $('#autoComplete').val();
+            console.log("In: " + input);*/
+
+            
+            $(document).ready(function(){
+                //console.log("Document ready");
+                $.ajax({
+                    url: "http://nodejsashir.us-east-2.elasticbeanstalk.com/3?symbol="+input ,
+                    type: 'GET',
+                    dataType: 'json',
+
+
+                    cache: false,
+
+                    
+
+                    success: function (data) {
+                        //$('.chartContainer').html(data);
+                        console.log(data);
+                        SMAgraph(data);
+
+                    },
+                    error: function(xhr, status, error) {
+                        var msg='';
+                        msg+="<div class='center' style='text-align:center; position: absolute; width: 200px; height: 50px;top: 50%; left: 50%;' >"+ "Failed to load Historical data" +"</div>";
+                        $("#chartcontainer").html(msg);
+                        //console.log(JSON.parse(xhr.responseText));
+                        console.log(xhr["responseJSON"]["error"]);
+                    },
+                    
+                });
+            });
+
+
+            function SMAgraph(data){
+            Android.ajaxSmaComplete();
+                console.log("Inside SMA");
+
+                Highcharts.chart('chartcontainer', {
+                    chart: {
+                        zoomType: 'x',
+                        type: 'spline'
+                        },
+
+                    title: {
+                        text: 'Simple Moving Average (SMA)'
+                        },
+
+                    subtitle: {
+                        useHTML:true,
+                        text: '<a href="https://www.alphavantage.co/" target="_blank" style="color: blue" >Source: Alpha Vantage </a>'
+                        },
+
+                    xAxis: {
+                        categories: data["finaldate"],
+                        labels: 
+                            {
+                                rotation: -45
+                            },
+                        tickInterval:1,
+  
+                        },
+
+                    yAxis: {
+                            title: {
+                                text: 'SMA'
+                            },
+                            
+                            },
+
+                    tooltip: {
+                            crosshairs: false,
+                            shared: true
+                            },
+
+                    plotOptions: {
+                        spline: {
+                            marker: {
+                                enabled:false,
+                                radius: 1,
+                                lineColor: '#666666',
+                                lineWidth: 1
+                            }
+                        },
+                        series: {
+                            lineWidth: 1,
+                            color: 'red'
+                            }    
+   
+                    },
+
+
+                    series: [{
+                        name: input,
+                        marker: {
+                            enabled:false,
+                            symbol: 'circle',
+                            radius: 2
+                        },
+                        data: data["finalval"],
+
+
+                    }],
+                    
+                });
+
+
+
+
+            }
+
+
+        }
+
+
+</script>
+  
+
+
+<!-- EMA CHART-->   
+<script type="text/javascript">
+    
+
+     function callEMA(input)
+    {
+            
+            /*var input = $('#autoComplete').val();
+            console.log("In: " + input);
+*/
+           
+            $(document).ready(function(){
+                //console.log("Document ready");
+                $.ajax({
+                    url: "http://nodejsashir.us-east-2.elasticbeanstalk.com/4?symbol="+input ,
+                    type: 'GET',
+                    dataType: 'json',
+
+
+                    cache: false,
+
+                    
+
+                    success: function (data) {
+                        //$('.chartContainer').html(data);
+                        console.log(data);
+                        EMAgraph(data);
+
+                    },
+                    error: function(xhr, status, error) {
+                        
+                        console.log(JSON.parse(xhr.responseText));
+                        //alert("error");
+                    },
+                    
+                });
+            });
+
+
+            function EMAgraph(data){
+            Android.ajaxEmaComplete();
+                console.log("Inside EMA");
+
+                Highcharts.chart('chartcontainer', {
+                    chart: {
+                        zoomType: 'x',
+                        type: 'spline'
+                        },
+
+                    title: {
+                        text: 'Exponential Moving Average(EMA)'
+                        },
+
+                    subtitle: {
+                        useHTML:true,
+                        text: '<a href="https://www.alphavantage.co/" target="_blank" style="color: blue" >Source: Alpha Vantage </a>'
+                        },
+
+                    xAxis: {
+                        categories: data["finaldate"],
+                        labels: 
+                            {
+                                rotation: -45
+                            },
+                        tickInterval:1,
+  
+                        },
+
+                    yAxis: {
+                            title: {
+                                text: 'EMA'
+                            },
+                            
+                            },
+
+                    tooltip: {
+                            crosshairs: false,
+                            shared: true
+                            },
+
+                    plotOptions: {
+                        spline: {
+                            marker: {
+                                enabled:false,
+                                radius: 1,
+                                lineColor: '#666666',
+                                lineWidth: 1
+                            }
+                        },
+                        series: {
+                            lineWidth: 1,
+                            color: 'red'
+                            }    
+   
+                    },
+
+
+                    series: [{
+                        name: input,
+                        marker: {
+                            enabled:false,
+                            symbol: 'circle',
+                            radius: 2
+                        },
+                        data: data["finalval"],
+
+
+                    }],
+                    
+                });
+
+
+
+
+            }
+
+
+        }
+
+
+</script>
+
+
+<!-- RSI CHART-->
+<script type="text/javascript">
+
+     function callRSI(input)
+    {
+            
+            /*var input = $('#autoComplete').val();
+            console.log("In: " + input);
+*/
+           
+
+            $(document).ready(function(){
+                //console.log("Document ready");
+                $.ajax({
+                    url: "http://nodejsashir.us-east-2.elasticbeanstalk.com/6?symbol="+input ,
+                    type: 'GET',
+                    dataType: 'json',
+
+
+                    cache: false,
+
+                    
+
+                    success: function (data) {
+                        //$('.chartContainer').html(data);
+                        console.log(data);
+                        RSIgraph(data);
+
+                    },
+                    error: function(xhr, status, error) {
+                        
+                        console.log(JSON.parse(xhr.responseText));
+                        //alert("error");
+                    },
+                    
+                });
+            });
+
+
+            function RSIgraph(data){
+            Android.ajaxRsiComplete();
+                console.log("Inside RSI");
+
+                Highcharts.chart('chartcontainer', {
+                    chart: {
+                        zoomType: 'x',
+                        type: 'spline'
+                        },
+
+                    title: {
+                        text: 'Relative Strength Index (RSI)'
+                        },
+
+                    subtitle: {
+                        useHTML:true,
+                        text: '<a href="https://www.alphavantage.co/" target="_blank" style="color: blue" >Source: Alpha Vantage </a>'
+                        },
+
+                    xAxis: {
+                        categories: data["finaldate"],
+                        labels: 
+                            {
+                                rotation: -45
+                            },
+                        tickInterval:1,
+  
+                        },
+
+                    yAxis: {
+                            title: {
+                                text: 'RSI'
+                            },
+                            
+                            },
+
+                    tooltip: {
+                            crosshairs: false,
+                            shared: true
+                            },
+
+                    plotOptions: {
+                        spline: {
+                            marker: {
+                                enabled:false,
+                                radius: 1,
+                                lineColor: '#666666',
+                                lineWidth: 1
+                            }
+                        },
+                        series: {
+                            lineWidth: 1,
+                            color: 'blue'
+                            }    
+   
+                    },
+
+
+                    series: [{
+                        name: input,
+                        marker: {
+                            enabled:false,
+                            symbol: 'circle',
+                            radius: 2
+                        },
+                        data: data["finalval"],
+
+
+                    }],
+                    
+                });
+
+
+
+
+            }
+
+
+        }
+    
+
+
+
+</script>
+
+
+<!-- ADX CHART-->
+
+    
+<script type="text/javascript">
+
+     function callADX(input)
+    {
+            
+           /* var input = $('#autoComplete').val();
+            console.log("In: " + input);*/
+
+            
+
+            $(document).ready(function(){
+                //console.log("Document ready");
+                $.ajax({
+                    url: "http://nodejsashir.us-east-2.elasticbeanstalk.com/7?symbol="+input ,
+                    type: 'GET',
+                    dataType: 'json',
+
+
+                    cache: false,
+
+                    
+                    success: function (data) {
+                        //$('.chartContainer').html(data);
+                        console.log(data);
+                        ADXgraph(data);
+
+                    },
+                error: function(xhr, status, error) {
+                       
+                        console.log(JSON.parse(xhr.responseText));
+                        //alert("error");
+                    },
+
+                    
+                });
+            });
+
+
+            function ADXgraph(data){
+            Android.ajaxAdxComplete();
+                console.log("Inside ADX");
+
+                Highcharts.chart('chartcontainer', {
+                    chart: {
+                        zoomType: 'x',
+                        type: 'spline'
+                        },
+
+                    title: {
+                        text: 'Average Directional Movement Index (ADX)'
+                        },
+
+                    subtitle: {
+                        useHTML:true,
+                        text: '<a href="https://www.alphavantage.co/" target="_blank" style="color: blue" >Source: Alpha Vantage </a>'
+                        },
+
+                    xAxis: {
+                        categories: data["finaldate"],
+                        labels: 
+                            {
+                                rotation: -45
+                            },
+                        tickInterval:1,
+  
+                        },
+
+                    yAxis: {
+                            title: {
+                                text: 'ADX'
+                            },
+                            
+                            },
+
+                    tooltip: {
+                            crosshairs: false,
+                            shared: true
+                            },
+
+                    plotOptions: {
+                        spline: {
+                            marker: {
+                                enabled:false,
+                                radius: 1,
+                                lineColor: '#666666',
+                                lineWidth: 1
+                            }
+                        },
+                        series: {
+                            lineWidth: 1,
+                            color: 'blue'
+                            }    
+   
+                    },
+
+
+                    series: [{
+                        name: input,
+                        marker: {
+                            enabled:false,
+                            symbol: 'circle',
+                            radius: 2
+                        },
+                        data: data["finalval"],
+
+
+                    }],
+                    
+                });
+
+
+
+
+            }
+
+
+        }
+
+</script>
+
+
+<!-- CCI CHART-->
+
+    
+<script type="text/javascript">
+
+     function callCCI(input)
+    {
+            
+            /*var input = $('#autoComplete').val();
+            console.log("In: " + input);*/
+
+            
+            $(document).ready(function(){
+                //console.log("Document ready");
+                $.ajax({
+                    url: "http://nodejsashir.us-east-2.elasticbeanstalk.com/8?symbol="+input ,
+                    type: 'GET',
+                    dataType: 'json',
+
+
+                    cache: false,
+
+                    
+
+                    success: function (data) {
+                        //$('.chartContainer').html(data);
+                        console.log(data);
+                        CCIgraph(data);
+
+                    },
+                error: function(xhr, status, error) {
+                        
+                        console.log(JSON.parse(xhr.responseText));
+                        //alert("error");
+                    },
+                    
+                });
+            });
+
+
+            function CCIgraph(data){
+            Android.ajaxCciComplete();
+                console.log("Inside CCI");
+
+                Highcharts.chart('chartcontainer', {
+                    chart: {
+                        zoomType: 'x',
+                        type: 'spline'
+                        },
+
+                    title: {
+                        text: 'Commodity Channel Index (CCI)'
+                        },
+
+                    subtitle: {
+                        useHTML:true,
+                        text: '<a href="https://www.alphavantage.co/" target="_blank" style="color: blue" >Source: Alpha Vantage </a>'
+                        },
+
+                    xAxis: {
+                        categories: data["finaldate"],
+                        labels: 
+                            {
+                                rotation: -45
+                            },
+                        tickInterval:1,
+  
+                        },
+
+                    yAxis: {
+                            title: {
+                                text: 'CCI'
+                            },
+                            
+                            },
+
+                    tooltip: {
+                            crosshairs: false,
+                            shared: true
+                            },
+
+                    plotOptions: {
+                        spline: {
+                            marker: {
+                                enabled:false,
+                                radius: 1,
+                                lineColor: '#666666',
+                                lineWidth: 1
+                            }
+                        },
+                        series: {
+                            lineWidth: 1,
+                            color: 'blue'
+                            }    
+   
+                    },
+
+
+                    series: [{
+                        name: input,
+                        marker: {
+                            enabled:false,
+                            symbol: 'circle',
+                            radius: 2
+                        },
+                        data: data["finalval"],
+
+
+                    }],
+                    
+                });
+
+
+
+
+            }
+
+
+        }
+
+</script>
+
+
+
+<!--STOCH CHART-->
+
+    
+<script type="text/javascript">
+
+     function callSTOCH(input)
+    {
+            
+            /*var input = $('#autoComplete').val();
+            console.log("In: " + input);
+*/
+            
+
+            $(document).ready(function(){
+                //console.log("Document ready");
+                $.ajax({
+                    url: "http://nodejsashir.us-east-2.elasticbeanstalk.com/5?symbol="+input ,
+                    type: 'GET',
+                    dataType: 'json',
+
+
+                    cache: false,
+
+                    
+
+                    success: function (data) {
+                        //$('.chartContainer').html(data);
+                        console.log(data);
+                        STOCHgraph(data);
+
+                    },
+                error: function(xhr, status, error) {
+                        
+                        console.log(JSON.parse(xhr.responseText));
+                        //alert("error");
+                    },
+                    
+                });
+            });
+
+
+            function STOCHgraph(data){
+            Android.ajaxStochComplete();
+                console.log("Inside STOCH");
+
+                Highcharts.chart('chartcontainer', {
+                    chart: {
+                        zoomType: 'x',
+                        type: 'spline'
+                        },
+
+                    title: {
+                        text: 'Stochastic Oscillator (STOCH)'
+                        },
+
+                    subtitle: {
+                        useHTML:true,
+                        text: '<a href="https://www.alphavantage.co/" target="_blank" style="color: blue" >Source: Alpha Vantage </a>'
+                        },
+
+                    xAxis: {
+                        categories: data["finaldate"],
+                        labels: 
+                            {
+                                rotation: -45
+                            },
+                        tickInterval:1,
+  
+                        },
+
+                    yAxis: {
+                            title: {
+                                text: 'STOCH'
+                            },
+                            
+                            },
+
+                    tooltip: {
+                            crosshairs: false,
+                            shared: true
+                            },
+
+                    plotOptions: {
+                        spline: {
+                            marker: {
+                                enabled:false,
+                                radius: 1,
+                                lineColor: '#666666',
+                                lineWidth: 1
+                            }
+                        },
+                        series: {
+                            lineWidth: 1,
+                            color: 'blue'
+                            }    
+   
+                    },
+
+
+                    series: [{
+                        name: input+" SlowK",
+                        marker: {
+                            enabled:false,
+                            symbol: 'circle',
+                            radius: 2
+                        },
+                        data: data["finalval"], color:'red'
+
+
+                    },
+
+                    {
+
+                        name: input+" SlowD",
+                        marker: {
+                            enabled:false,
+                            symbol: 'circle',
+                            radius: 2
+                        },
+                        data: data["finalval1"],color:'green'
+
+                    }
+
+                    ],
+                    
+                });
+
+
+
+
+            }
+
+
+        }
+
+</script>
+
+
+<!-- BBANDS CHART -->
+<script type="text/javascript">
+
+     function callBBANDS(input)
+    {
+            
+            /*var input = $('#autoComplete').val();
+            console.log("In: " + input);*/
+
+            
+
+            $(document).ready(function(){
+                //console.log("Document ready");
+                $.ajax({
+                    url: "http://nodejsashir.us-east-2.elasticbeanstalk.com/9?symbol="+input ,
+                    type: 'GET',
+                    dataType: 'json',
+
+
+                    cache: false,
+
+                    
+
+                    success: function (data) {
+                        //$('.chartContainer').html(data);
+                        console.log(data);
+                        BBANDSgraph(data);
+
+                    },
+                error: function(xhr, status, error) {
+                        
+                        console.log(JSON.parse(xhr.responseText));
+                        //alert("error");
+                    },
+                    
+                });
+            });
+
+
+            function BBANDSgraph(data){
+            Android.ajaxBbandsComplete();
+                console.log("Inside BBANDS");
+
+                Highcharts.chart('chartcontainer', {
+                    chart: {
+                        zoomType: 'x',
+                        type: 'spline'
+                        },
+
+                    title: {
+                        text: 'Bollinger Bands (BBANDS)'
+                        },
+
+                    subtitle: {
+                        useHTML:true,
+                        text: '<a href="https://www.alphavantage.co/" target="_blank" style="color: blue" >Source: Alpha Vantage </a>'
+                        },
+
+                    xAxis: {
+                        categories: data["finaldate"],
+                        labels: 
+                            {
+                                rotation: -45
+                            },
+                        tickInterval:1,
+  
+                        },
+
+                    yAxis: {
+                            title: {
+                                text: 'BBANDS'
+                            },
+                            
+                            },
+
+                    tooltip: {
+                            crosshairs: false,
+                            shared: true
+                            },
+
+                    plotOptions: {
+                        spline: {
+                            marker: {
+                                enabled:false,
+                                radius: 1,
+                                lineColor: '#666666',
+                                lineWidth: 1
+                            }
+                        },
+                        series: {
+                            lineWidth: 1,
+                            color: 'blue'
+                            }    
+   
+                    },
+
+
+                    series: [{
+                        name: input+" Real Upper Band",
+                        marker: {
+                            enabled:false,
+                            symbol: 'circle',
+                            radius: 2
+                        },
+                        data: data["finalvalhigh"], color:'red'
+
+
+                    },
+
+                    {
+
+                        name: input+" Real Middle Band",
+                        marker: {
+                            enabled:false,
+                            symbol: 'circle',
+                            radius: 2
+                        },
+                        data: data["finalvalmid"],color:'green'
+
+                    },
+
+                    {
+                        name: input+" Real Lower Band",
+                        marker: {
+                            enabled:false,
+                            symbol: 'circle',
+                            radius: 2
+                        },
+                        data: data["finalvallow"], color:'blue'
+
+
+                    }
+
+                    ],
+                    
+                });
+
+
+
+
+            }
+
+
+        }
+
+</script>
+
+
+<!-- MACD CHART -->
+<script type="text/javascript">
+
+     function callMACD(input)
+    {
+            
+            /*var input = $('#autoComplete').val();
+            console.log("In: " + input);
+
+*/
+           
+
+            $(document).ready(function(){
+
+                //console.log("Document ready");
+                $.ajax({
+                    url: "http://nodejsashir.us-east-2.elasticbeanstalk.com/10?symbol="+input ,
+                    type: 'GET',
+                    dataType: 'json',
+
+
+                    cache: false,
+
+                    
+                    success: function (data) {
+                        //$('.chartContainer').html(data);
+                        console.log(data);
+                        MACDgraph(data);
+
+                    },
+                    error: function(xhr, status, error) {
+                        
+                        console.log(JSON.parse(xhr.responseText));
+                        //alert("error");
+                    },
+
+                    
+                });
+            });
+
+
+            function MACDgraph(data){
+            Android.ajaxMacdComplete();
+                console.log("Inside MACD");
+
+                Highcharts.chart('chartcontainer', {
+                    chart: {
+                        zoomType: 'x',
+                        type: 'spline'
+                        },
+
+                    title: {
+                        text: 'Moving Average Convergence/Divergence(MACD)'
+                        },
+
+                    subtitle: {
+                        useHTML:true,
+                        text: '<a href="https://www.alphavantage.co/" target="_blank" style="color: blue" >Source: Alpha Vantage </a>'
+                        },
+
+                    xAxis: {
+                        categories: data["finaldate"],
+                        labels: 
+                            {
+                                rotation: -45
+                            },
+                        tickInterval:1,
+  
+                        },
+
+                    yAxis: {
+                            title: {
+                                text: 'MACD'
+                            },
+                            
+                            },
+
+                    tooltip: {
+                            crosshairs: false,
+                            shared: true
+                            },
+
+                    plotOptions: {
+                        spline: {
+                            marker: {
+                                enabled:false,
+                                radius: 1,
+                                lineColor: '#666666',
+                                lineWidth: 1
+                            }
+                        },
+                        series: {
+                            lineWidth: 1,
+                            color: 'blue'
+                            }    
+   
+                    },
+
+
+                    series: [{
+                        name: input+" MACD_Hist",
+                        marker: {
+                            enabled:false,
+                            symbol: 'circle',
+                            radius: 2
+                        },
+                        data: data["finalvalhist"], color:'red'
+
+
+                    },
+
+                    {
+
+                        name: input+" MACD_Signal",
+                        marker: {
+                            enabled:false,
+                            symbol: 'circle',
+                            radius: 2
+                        },
+                        data: data["finalvalsig"],color:'green'
+
+                    },
+
+                    {
+                        name: input+" MACD",
+                        marker: {
+                            enabled:false,
+                            symbol: 'circle',
+                            radius: 2
+                        },
+                        data: data["finalvalnorm"], color:'blue'
+
+
+                    }
+
+                    ],
+                    
+                });
+
+
+
+
+            }
+
+
+        }
+
+    
+
+</script>    
+    
+    
+</body>
+</html>
